@@ -16,7 +16,6 @@ import model.entities.Department;
 import model.entities.Seller;
 
 public class SellerDaoJDBC implements SellerDao {
-
     private Connection conn;
 
     public SellerDaoJDBC(Connection conn) {
@@ -68,36 +67,46 @@ public class SellerDaoJDBC implements SellerDao {
             DB.closeResultSet(rs);
         }
     }
-
-    // try catch do findById já vai tratar a exceção, portanto precisa somente
-    // propagar ela (Throws)
-    private Department instantiateDepartment(ResultSet rs) throws SQLException {
-        Department dep = new Department();
-        dep.setId(rs.getInt("DepartmentId"));
-        dep.setName(rs.getString("DepName"));
-        return dep;
-    }
-
-    // try catch do findById já vai tratar a exceção, portanto precisa somente
-    // propagar ela (Throws)
-    private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
-        Seller obj = new Seller();
-        obj.setId(rs.getInt("Id"));
-        obj.setName(rs.getString("Name"));
-        obj.setEmail(rs.getString("Email"));
-        obj.setBirthDate(rs.getDate("BirthDate"));
-        obj.setBaseSalary(rs.getDouble("BaseSalary"));
-        obj.setDepartment(dep);
-        return obj;
-    }
-   
-
+     
     @Override
     public List<Seller> findAll() {
-        // TODO Auto-generated method stub
-        return null;
-    }
+        PreparedStatement st = null;
+        ResultSet rs = null;
+        try {
+            st = conn.prepareStatement(
+                    "SELECT seller.*,department.Name as DepName "
+                    + "FROM seller INNER JOIN department "
+                    + "ON seller.DepartmentId = department.Id "
+                    + "ORDER BY Name");
 
+                    rs = st.executeQuery(); // executa o comando SQL e armazena o resultado na rs
+
+                    List<Seller> list = new ArrayList<>();
+                    Map<Integer, Department> map = new HashMap<>();
+        
+                    while (rs.next()) {
+                        // busca no map department com Id igual o Id do ResultSet
+                        Department dep = map.get(rs.getInt("DepartmentId"));
+        
+                        // se Id buscado existir não entra no if para instanciar o department
+                        // senão significa que department já foi instanciado, segue para instanciar o seller
+                        if (dep == null) {
+                            dep = instantiateDepartment(rs);
+                            map.put(rs.getInt("DepartmentId"), dep);  // adiciona departamento instanciado ao map
+                        }
+                        
+                        Seller obj = instantiateSeller(rs, dep);
+                        list.add(obj);
+                    }
+                    return list;
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } finally {
+            DB.closeStatement(st);
+            DB.closeResultSet(rs);
+        }
+    }
+    
     @Override
     public List<Seller> findByDepartment(Department department) {
         PreparedStatement st = null;
@@ -140,4 +149,25 @@ public class SellerDaoJDBC implements SellerDao {
         }
     }
 
+    // try catch do findById já vai tratar a exceção, portanto precisa somente
+    // propagar ela (Throws)
+    private Department instantiateDepartment(ResultSet rs) throws SQLException {
+        Department dep = new Department();
+        dep.setId(rs.getInt("DepartmentId"));
+        dep.setName(rs.getString("DepName"));
+        return dep;
+    }
+
+    // try catch do findById já vai tratar a exceção, portanto precisa somente
+    // propagar ela (Throws)
+    private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
+        Seller obj = new Seller();
+        obj.setId(rs.getInt("Id"));
+        obj.setName(rs.getString("Name"));
+        obj.setEmail(rs.getString("Email"));
+        obj.setBirthDate(rs.getDate("BirthDate"));
+        obj.setBaseSalary(rs.getDouble("BaseSalary"));
+        obj.setDepartment(dep);
+        return obj;
+    }
 }
