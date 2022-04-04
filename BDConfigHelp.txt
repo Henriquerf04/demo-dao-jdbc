@@ -1,0 +1,4 @@
+Add MySQL JAR file (driver) to Java Project: Java Projects > Project Name > Referencies Libraries > Add >
+C:\java-libs\jdbc-connectors\mysql-connector-java-8.0.27.jar
+ 
+Run BD: Control Panel > Administrative Tolls > Services > MySQL80 (run)
