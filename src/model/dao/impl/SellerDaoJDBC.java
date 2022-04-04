@@ -131,7 +131,8 @@ public class SellerDaoJDBC implements SellerDao {
                 Seller obj = instantiateSeller(rs, dep);
                 return obj;
             }
-            return null;
+            throw new DbException("Id not found!");
+                           
         } catch (SQLException e) {
             throw new DbException(e.getMessage());
         } finally {
