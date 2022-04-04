@@ -36,6 +36,16 @@ public class Program {
         Seller newSeller = new Seller(null, "Coronel Mostarda", "mustard@gmail.com", new Date(), 25000.0, department);
         sellerDao.insert(newSeller);
         System.out.println("Inserted! New id = " + newSeller.getId());
-        
+        System.out.println("-------------------------------");
+
+        System.out.println("=== TEST 5: seller update ====");
+        Seller sellerToUpdate = sellerDao.findById(8);
+        sellerToUpdate.setName("Johnny Deep");
+        sellerToUpdate.setEmail("johnny@gmail.com");
+        sellerToUpdate.setBirthDate(new Date());
+        sellerToUpdate.setBaseSalary(125000.75);
+        sellerToUpdate.setDepartment(department);      
+        sellerDao.update(sellerToUpdate);
+        System.out.println("Upadate completed");
     }
 }
